@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "evm-testing-lab"
+version = "0.1.0"
+description = " EVM test automation project with Python, pytest, web3.py, Foundry and Anvil."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+
+dependencies = [
+    "web3",
+    "eth-account",
+]
+
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "pytest-timeout",
+    "allure-pytest",
+    "ruff",
+    "mypy",
+    "pre-commit",
+]
+
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --strict-config"
+xfail_strict = true
+
+markers = [
+    "unit: fast isolated tests",
+    "integration: tests requiring local blockchain infrastructure",
+]
+
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "UP",
+    "B",
+]
+
+
+[tool.mypy]
+python_version = "3.12"
+check_untyped_defs = true
+disallow_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true

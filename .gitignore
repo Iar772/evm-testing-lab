@@ -1,0 +1,86 @@
+# =========================
+# Python virtual environments
+# =========================
+.venv/
+venv/
+env/
+ENV/
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# =========================
+# Pytest / Coverage
+# =========================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+pytestdebug.log
+
+# =========================
+# Type checking / linters
+# =========================
+.mypy_cache/
+.ruff_cache/
+
+# =========================
+# Allure
+# =========================
+allure-results/
+allure-report/
+
+# =========================
+# Environment / secrets
+# =========================
+.env
+.env.*
+!.env.example
+
+# Private keys / secrets
+*.pem
+*.key
+
+# =========================
+# IDE
+# =========================
+.idea/
+.vscode/
+
+# =========================
+# macOS
+# =========================
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# =========================
+# Logs / temp
+# =========================
+*.log
+*.tmp
+*.temp
+
+# =========================
+# Foundry
+# =========================
+out/
+cache/
+broadcast/
+
+# =========================
+# Misc
+# =========================
+Thumbs.db
