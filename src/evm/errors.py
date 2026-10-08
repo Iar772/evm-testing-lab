@@ -8,3 +8,11 @@ class MalformedRpcResponseError(Exception):
 
 class WrongNetworkError(Exception):
     pass
+
+
+class TransactionTrackingTimeoutError(Exception):
+    pass
+
+
+class TransactionRevertedError(Exception):
+    pass
