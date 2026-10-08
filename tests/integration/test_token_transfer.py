@@ -130,7 +130,6 @@ class TestTokenTransfer:
             tx_hash = token_contract.functions.mint(alice, mint_amount).transact({"from": deployer})
 
         with allure.step(f"Wait for initial receipt and verify transaction success: {tx_hash}"):
-            # ИСПОЛЬЗУЕМ wait_for_receipt, так как здесь мы просто забираем начальный блок транзакции
             receipt = transaction_tracker.wait_for_receipt(tx_hash)
             transaction_verifier.verify_success(receipt)
             tx_block = receipt["blockNumber"]
