@@ -47,6 +47,12 @@ markers = [
 target-version = "py312"
 line-length = 120
 
+exclude = [
+    "lib",
+    "out",
+    "cache",
+    "broadcast",
+]
 
 [tool.ruff.lint]
 select = [
