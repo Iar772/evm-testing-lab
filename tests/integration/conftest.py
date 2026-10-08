@@ -9,6 +9,9 @@ import allure
 import pytest
 from web3 import Web3
 
+from evm.blockchain.transaction_tracker import TransactionTracker
+from evm.blockchain.transaction_verifier import TransactionVerifier
+
 
 @pytest.fixture(scope="session")
 def w3():
@@ -121,3 +124,11 @@ def state_snapshot(w3: Web3):
                 f"EVM Teardown Error: Failed to revert state to snapshot {snapshot_id}. "
                 f"Expected True, got {revert_result}. Raw RPC response: {revert_response}"
             )
+
+@pytest.fixture(scope="session")
+def transaction_tracker(w3):
+    return TransactionTracker(w3)
+
+@pytest.fixture(scope="session")
+def transaction_verifier():
+    return TransactionVerifier()

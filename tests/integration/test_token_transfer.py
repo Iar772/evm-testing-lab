@@ -29,7 +29,16 @@ class TestTokenTransfer:
 
     @allure.story("Token transfer")
     @allure.title("Successful transfer after mint")
-    def test_mint_transfer_success(self, w3: Web3, token_contract, alice, bob, deployer) -> None:
+    def test_mint_transfer_success(
+        self,
+        w3: Web3,
+        token_contract,
+        alice,
+        bob,
+        deployer,
+        transaction_tracker,
+        transaction_verifier
+    ) -> None:
         token_unit = 10 ** 18
 
         mint_amount = 1000 * token_unit
@@ -38,17 +47,21 @@ class TestTokenTransfer:
             alice_balance_before = token_contract.functions.balanceOf(alice).call()
             bob_balance_before = token_contract.functions.balanceOf(bob).call()
 
-        with allure.step(f"Mint {mint_amount} TST to Alice ({alice})"):
+        with allure.step(f"Mint 1000 TST to Alice ({alice})"):
             tx_hash = token_contract.functions.mint(alice, mint_amount).transact({"from": deployer})
-            mint_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
-            assert mint_receipt["status"] == 1, "Mint transaction failed"
+
+        with allure.step(f"Wait for mint receipt and verify transaction success: {tx_hash}"):
+            mint_receipt = transaction_tracker.wait_for_receipt(tx_hash)
+            transaction_verifier.verify_success(mint_receipt)
 
         with allure.step(f"Alice transfers {transfer_amount} TST to Bob ({bob})"):
             tx_hash = token_contract.functions.transfer(bob, transfer_amount).transact(
                 {"from": alice}
             )
-            transfer_receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
-            assert transfer_receipt["status"] == 1, "Transfer transaction failed"
+
+        with allure.step(f"Wait for transfer receipt and verify transaction success: {tx_hash}"):
+            transfer_receipt = transaction_tracker.wait_for_receipt(tx_hash)
+            transaction_verifier.verify_success(transfer_receipt)
 
         with allure.step("Verify Alice and Bob balance deltas"):
             alice_balance_after = token_contract.functions.balanceOf(alice).call()
@@ -71,7 +84,6 @@ class TestTokenTransfer:
             assert event_data["value"] == transfer_amount, (
                 f"Expected event value {transfer_amount}, got {event_data['value']}"
             )
-
 
     @allure.title("Transfer fails when sender has insufficient balance")
     def test_insufficient_balance(self, w3: Web3, token_contract, alice, bob) -> None:
@@ -100,3 +112,40 @@ class TestTokenTransfer:
                 f"State mutated! Alice balance changed from {alice_balance_before} to {alice_balance_after}"
             )
 
+    @allure.story("Token transfer confirmations")
+    @allure.title("Successful multi-block transaction confirmation via tracker")
+    def test_transaction_multi_confirmation_success(
+        self,
+        w3: Web3,
+        token_contract,
+        alice,
+        deployer,
+        transaction_tracker,
+        transaction_verifier
+    ) -> None:
+        token_unit = 10 ** 18
+        mint_amount = 50 * token_unit
+
+        with allure.step(f"Submit mint transaction of {mint_amount} TST to Alice"):
+            tx_hash = token_contract.functions.mint(alice, mint_amount).transact({"from": deployer})
+
+        with allure.step(f"Wait for initial receipt and verify transaction success: {tx_hash}"):
+            # ИСПОЛЬЗУЕМ wait_for_receipt, так как здесь мы просто забираем начальный блок транзакции
+            receipt = transaction_tracker.wait_for_receipt(tx_hash)
+            transaction_verifier.verify_success(receipt)
+            tx_block = receipt["blockNumber"]
+
+        with allure.step("Mine 2 additional Anvil blocks to satisfy confirmation depth"):
+            for _ in range(2):
+                w3.provider.make_request("evm_mine", [])
+
+        with allure.step("Verify current blockchain head height"):
+            current_head = w3.eth.block_number
+            assert current_head == tx_block + 2, f"Expected block height {tx_block + 2}, but got {current_head}"
+
+        with allure.step(f"Verify wait_for_confirmations immediately finds 3 blocks for tx: {tx_hash}"):
+            transaction_tracker.wait_for_confirmations(
+                tx_hash=tx_hash,
+                required_confirmations=3,
+                timeout=5
+            )
