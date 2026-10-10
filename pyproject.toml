@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "evm-testing-lab"
 version = "0.1.0"
-description = " EVM test automation project with Python, pytest, web3.py, Foundry and Anvil."
+description = "EVM test automation project with Python, pytest, web3.py, Foundry and Anvil."
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 
@@ -63,10 +63,14 @@ select = [
     "B",
 ]
 
+[tool.coverage.run]
+source = ["evm"]
+branch = true
 
-[tool.mypy]
-python_version = "3.12"
-check_untyped_defs = true
-disallow_untyped_defs = true
-warn_unused_ignores = true
-warn_redundant_casts = true
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 85
+
+[tool.coverage.xml]
+output = "coverage.xml"
