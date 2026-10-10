@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock
+
 import pytest
+
 from evm.blockchain.log_scanner import LogScanner
 
 
