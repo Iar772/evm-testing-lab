@@ -16,3 +16,6 @@ class TransactionTrackingTimeoutError(Exception):
 
 class TransactionRevertedError(Exception):
     pass
+
+class RPCTransportError(Exception):
+    pass
