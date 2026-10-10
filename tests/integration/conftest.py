@@ -1,7 +1,3 @@
-# w3
-# token_artifact
-# token_contract
-# anvil_snapshot
 import json
 from pathlib import Path
 
@@ -9,8 +5,11 @@ import allure
 import pytest
 from web3 import Web3
 
+from evm.blockchain.log_scanner import LogScanner
 from evm.blockchain.transaction_tracker import TransactionTracker
 from evm.blockchain.transaction_verifier import TransactionVerifier
+from evm.rpc.client import RpcClient
+from evm.rpc.failover_client import RpcFailoverClient
 
 
 @pytest.fixture(scope="session")
@@ -95,7 +94,6 @@ def bob(w3: Web3):
 
 @pytest.fixture
 def state_snapshot(w3: Web3):
-    # --- PHASE 1: SETUP ---
     with allure.step("EVM State Isolation: Create snapshot"):
         response = w3.provider.make_request("evm_snapshot", [])
 
@@ -132,3 +130,23 @@ def transaction_tracker(w3):
 @pytest.fixture(scope="session")
 def transaction_verifier():
     return TransactionVerifier()
+
+@pytest.fixture(scope="session")
+def rpc_failover_client(w3: Web3) -> RpcFailoverClient:
+    primary_client = RpcClient(w3.provider)
+
+    return RpcFailoverClient(
+        clients=[primary_client]
+    )
+
+
+@pytest.fixture(scope="session")
+def log_scanner(
+    rpc_failover_client: RpcFailoverClient,
+    w3: Web3,
+) -> LogScanner:
+    return LogScanner(
+        log_source=rpc_failover_client,
+        chain_id=w3.eth.chain_id,
+        chunk_size=100,
+    )
